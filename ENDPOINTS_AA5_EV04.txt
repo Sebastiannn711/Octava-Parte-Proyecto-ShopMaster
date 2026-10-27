@@ -1,0 +1,19 @@
+# Endpoints probados — ShopMaster AA5-EV04
+
+Base local: `http://localhost:8080`
+
+| Método | Endpoint | Prueba |
+|---|---|---|
+| GET | `/api/productos` | Lista de productos |
+| GET | `/api/categorias` | Categorías disponibles |
+| GET | `/api/productos/1` | Detalle de producto |
+| POST | `/api/pedidos` | Crear pedido y calcular total |
+| GET | `/api/pedidos/{id}` | Consultar el pedido creado |
+| GET | `/api/admin/productos` | Listar productos en administración |
+| POST | `/api/admin/productos` | Crear producto de prueba |
+| PUT | `/api/admin/productos/{id}` | Actualizar producto de prueba |
+| DELETE | `/api/admin/productos/{id}` | Eliminar producto de prueba |
+| POST | `/api/auth/register` | Registrar usuario de demostración |
+| POST | `/api/auth/login` | Iniciar sesión con ese usuario |
+
+Para las rutas `POST` y `PUT`, seleccionar **Body → raw → JSON**. La colección importable configura automáticamente el tipo JSON.

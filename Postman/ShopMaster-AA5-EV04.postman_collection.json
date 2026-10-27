@@ -1,0 +1,105 @@
+{
+  "info": {
+    "name": "ShopMaster - AA5-EV04",
+    "description": "Pruebas de catálogo, pedidos, administración y autenticación para la API académica ShopMaster. Ejecutar las solicitudes en orden con el servidor iniciado en localhost:8080.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "orderId", "value": "" },
+    { "key": "productId", "value": "" },
+    { "key": "testUsuario", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Catálogo",
+      "item": [
+        {
+          "name": "Listar productos",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/productos" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });", "pm.test('Devuelve una lista con productos', function () { const datos = pm.response.json(); pm.expect(datos).to.be.an('array').that.is.not.empty; });"] } }]
+        },
+        {
+          "name": "Consultar categorías",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/categorias" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });", "pm.test('Devuelve categorías', function () { pm.expect(pm.response.json()).to.be.an('array').that.is.not.empty; });"] } }]
+        },
+        {
+          "name": "Consultar detalle del producto 1",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/productos/1" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });", "pm.test('El detalle corresponde al producto 1', function () { pm.expect(pm.response.json().id).to.eql(1); });"] } }]
+        }
+      ]
+    },
+    {
+      "name": "2. Pedidos",
+      "item": [
+        {
+          "name": "Crear pedido de demostración",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customerName\": \"Sebastián Veloza\",\n  \"phone\": \"3000000000\",\n  \"email\": \"sebas.ejemplo@example.com\",\n  \"address\": \"Calle de prueba 123\",\n  \"city\": \"Pasto\",\n  \"department\": \"Nariño\",\n  \"paymentMethod\": \"Contraentrega (demo)\",\n  \"items\": [\n    { \"productId\": 1, \"quantity\": 1 }\n  ]\n}" },
+            "url": "{{baseUrl}}/api/pedidos"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Crea el pedido (201 Created)', function () { pm.response.to.have.status(201); });", "const pedido = pm.response.json();", "pm.collectionVariables.set('orderId', pedido.id);", "pm.test('Devuelve identificador y total', function () { pm.expect(pedido.id).to.be.a('string'); pm.expect(pedido.total).to.be.above(0); });"] } }]
+        },
+        {
+          "name": "Consultar pedido creado",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/pedidos/{{orderId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });", "pm.test('El identificador coincide', function () { pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('orderId')); });"] } }]
+        }
+      ]
+    },
+    {
+      "name": "3. Administración de productos",
+      "item": [
+        {
+          "name": "Listar productos del panel",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/admin/productos" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });", "pm.test('Devuelve productos para el panel', function () { pm.expect(pm.response.json()).to.be.an('array').that.is.not.empty; });"] } }]
+        },
+        {
+          "name": "Crear producto de prueba",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Producto de prueba EV04\",\n  \"category\": \"Pruebas\",\n  \"price\": 10000,\n  \"oldPrice\": null,\n  \"stock\": 5,\n  \"image\": \"https://example.com/producto-prueba.jpg\",\n  \"tag\": \"Prueba\"\n}" },
+            "url": "{{baseUrl}}/api/admin/productos"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Crea el producto (201 Created)', function () { pm.response.to.have.status(201); });", "const producto = pm.response.json();", "pm.collectionVariables.set('productId', producto.id);", "pm.test('Guarda el identificador del producto creado', function () { pm.expect(producto.id).to.be.a('number'); });"] } }]
+        },
+        {
+          "name": "Actualizar producto de prueba",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Producto EV04 actualizado\",\n  \"category\": \"Pruebas\",\n  \"price\": 12000,\n  \"oldPrice\": null,\n  \"stock\": 4,\n  \"image\": \"https://example.com/producto-prueba.jpg\",\n  \"tag\": \"Actualizado\"\n}" },
+            "url": "{{baseUrl}}/api/admin/productos/{{productId}}"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Actualiza el producto (200 OK)', function () { pm.response.to.have.status(200); });", "pm.test('El nombre quedó actualizado', function () { pm.expect(pm.response.json().name).to.eql('Producto EV04 actualizado'); });"] } }]
+        },
+        {
+          "name": "Eliminar producto de prueba",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/api/admin/productos/{{productId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Elimina el producto (204 No Content)', function () { pm.response.to.have.status(204); });"] } }]
+        }
+      ]
+    },
+    {
+      "name": "4. Autenticación",
+      "item": [
+        {
+          "name": "Registrar usuario temporal",
+          "event": [{ "listen": "prerequest", "script": { "type": "text/javascript", "exec": ["pm.collectionVariables.set('testUsuario', 'sebas_ev04_' + Date.now());"] } }, { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Registra usuario (201 Created)', function () { pm.response.to.have.status(201); });", "pm.test('Confirma el registro', function () { pm.expect(pm.response.json().exitoso).to.eql(true); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"usuario\": \"{{testUsuario}}\",\n  \"contrasena\": \"ClaveDemo123\"\n}" }, "url": "{{baseUrl}}/api/auth/register" }
+        },
+        {
+          "name": "Iniciar sesión con usuario registrado",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"usuario\": \"{{testUsuario}}\",\n  \"contrasena\": \"ClaveDemo123\"\n}" }, "url": "{{baseUrl}}/api/auth/login" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Inicia sesión (200 OK)', function () { pm.response.to.have.status(200); });", "pm.test('Confirma autenticación', function () { pm.expect(pm.response.json().exitoso).to.eql(true); });"] } }]
+        }
+      ]
+    }
+  ]
+}
